@@ -6,9 +6,10 @@ import SideDrawer from '../SideDrawer/SideDrawer'
 import { Box } from "@chakra-ui/layout"
 import { Button, Tooltip, Text, Menu, MenuButton, Avatar, MenuList, MenuItem, MenuDivider } from '@chakra-ui/react'
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons"
+import NotificationBadge, { Effect } from "react-notification-badge"
 
 function Header() {
-    const { user } = AuthContext()
+    const { user, setSelectedChat, notifications, setNotifications } = AuthContext()
     const navigate = useNavigate()
 
     const handleLogout = () => {
@@ -31,8 +32,20 @@ function Header() {
                 <div>
                     <Menu>
                         <MenuButton p="1">
+                            <NotificationBadge count={notifications.length} effect={Effect.SCALE} />
                             <BellIcon fontSize="2xl" m="1" />
                         </MenuButton>
+                        <MenuList pl="2">
+                            {!notifications.length && "No New Message"}
+                            {notifications.map((notification) =>
+                                <MenuItem key={notification._id} onClick={() => {
+                                    setSelectedChat(notification.chat)
+                                    setNotifications(notifications.filter((notificationData) => notificationData !== notification))
+                                }}>
+                                    {notification.chat.isGroup ? `New Message from ${notification.chat.name}` : `New Message from ${notification.chat.users[0]._id === user._id ? notification.chat.users[1].name : notification.chat.users[0].name}`}
+                                </MenuItem>
+                            )}
+                        </MenuList>
                     </Menu>
                     <Menu>
                         <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>

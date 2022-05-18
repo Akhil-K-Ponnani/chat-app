@@ -18,9 +18,8 @@ function ChatBox({ fetchChats, setFetchChats }) {
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
   const [socketConnected, setSocketConnected] = useState(false)
-  const [typing, setTyping] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
-  const { user, selectedChat, setSelectedChat } = AuthContext()
+  const { user, selectedChat, setSelectedChat, notifications, setNotifications } = AuthContext()
   const toast = useToast()
 
   const showToast = (title, description, status) => {
@@ -60,10 +59,8 @@ function ChatBox({ fetchChats, setFetchChats }) {
     setMessage(e.target.value)
     if (socketConnected) {
       socket.emit("typing", selectedChat._id)
-      setTyping(true)
       setTimeout(() => {
         socket.emit("stop-typing", selectedChat._id)
-        setTyping(false)
       }, 3000)
     }
   }
@@ -119,12 +116,17 @@ function ChatBox({ fetchChats, setFetchChats }) {
     selectedChatBackup = selectedChat
   }, [selectedChat])
 
+
   useEffect(() => {
     socket.on("recieve-message", (message) => {
       if (selectedChatBackup && selectedChatBackup._id === message.chat._id)
         setMessages([...messages, message])
-      //else
-      /* Give notification */
+      else {
+        if (!notifications.includes(message)) {
+          setNotifications([message, ...notifications])
+          setFetchChats(!fetchChats)
+        }
+      }
     })
   })
 

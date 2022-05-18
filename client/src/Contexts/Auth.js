@@ -7,6 +7,7 @@ const AuthProvider = ({ children }) => {
     const [user, setUser] = useState()
     const [selectedChat, setSelectedChat] = useState()
     const [chats, setChats] = useState([])
+    const [notifications, setNotifications] = useState([])
     const navigate = useNavigate()
     useEffect(() => {
         let userInfo = JSON.parse(localStorage.getItem("user"))
@@ -15,7 +16,7 @@ const AuthProvider = ({ children }) => {
             navigate("/signin")
     }, [navigate])
     return (
-        <Auth.Provider value={{ user, chats, setChats, selectedChat, setSelectedChat }}>{children}</Auth.Provider>
+        <Auth.Provider value={{ user, chats, setChats, selectedChat, setSelectedChat, notifications, setNotifications }}>{children}</Auth.Provider>
     )
 }
 
