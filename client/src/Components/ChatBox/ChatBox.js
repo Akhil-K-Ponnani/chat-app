@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from 'react'
+import axios from "axios"
+import io from "socket.io-client"
+import Lottie from "react-lottie"
 import Profile from '../Profile/Profile'
 import UpdateGroup from '../UpdateGroup/UpdateGroup'
 import { AuthContext } from '../../Contexts/Auth'
-import axios from "axios"
+import typingAnimation from "../../Assets/Animations/typing.json"
 import { Box, IconButton, Text, Spinner, FormControl, Input, useToast, Avatar, Tooltip } from '@chakra-ui/react'
 import { ArrowBackIcon } from '@chakra-ui/icons'
 import ScrollableFeed from "react-scrollable-feed"
 import "../../styles.css"
 
+let socket, selectedChatBackup
+
 function ChatBox({ fetchChats, setFetchChats }) {
   const [messages, setMessages] = useState([])
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
+  const [socketConnected, setSocketConnected] = useState(false)
+  const [typing, setTyping] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
   const { user, selectedChat, setSelectedChat } = AuthContext()
   const toast = useToast()
 
@@ -50,11 +58,19 @@ function ChatBox({ fetchChats, setFetchChats }) {
 
   const handleTyping = (e) => {
     setMessage(e.target.value)
-    /* Typing indicator */
+    if (socketConnected) {
+      socket.emit("typing", selectedChat._id)
+      setTyping(true)
+      setTimeout(() => {
+        socket.emit("stop-typing", selectedChat._id)
+        setTyping(false)
+      }, 3000)
+    }
   }
 
   const sendMessage = (e) => {
     if (e.key === "Enter" && message !== "") {
+      socket.emit("stop-typing", selectedChat._id)
       let config = {
         headers: {
           "Content-type": "application/json",
@@ -62,9 +78,10 @@ function ChatBox({ fetchChats, setFetchChats }) {
         }
       }
       setMessage("")
-      axios.post("/message", { content: message, chatId: selectedChat._id }, config).then(({ data }) =>
+      axios.post("/message", { content: message, chatId: selectedChat._id }, config).then(({ data }) => {
+        socket.emit("send-message", data)
         setMessages([...messages, data])
-      ).catch(() =>
+      }).catch(() =>
         showToast("Error", "Something went Wrong", "error")
       )
     }
@@ -79,8 +96,8 @@ function ChatBox({ fetchChats, setFetchChats }) {
         }
       }
       axios.get(`/message/${selectedChat._id}`, config).then(({ data }) => {
-        console.log(data);
         setMessages(data)
+        socket.emit("join-chat", selectedChat._id)
         setLoading(false)
       }).catch(() => {
         showToast("Error", "Something went Wrong.", "error")
@@ -90,8 +107,26 @@ function ChatBox({ fetchChats, setFetchChats }) {
   }
 
   useEffect(() => {
+    socket = io()
+    socket.emit("setup", user._id)
+    socket.on("connected", () => setSocketConnected(true))
+    socket.on("typing", () => setIsTyping(true))
+    socket.on("stop-typing", () => setIsTyping(false))
+  }, [])
+
+  useEffect(() => {
     fetchMessages()
+    selectedChatBackup = selectedChat
   }, [selectedChat])
+
+  useEffect(() => {
+    socket.on("recieve-message", (message) => {
+      if (selectedChatBackup && selectedChatBackup._id === message.chat._id)
+        setMessages([...messages, message])
+      //else
+      /* Give notification */
+    })
+  })
 
   return (
     <Box d={{ base: selectedChat ? "flex" : "none", md: "flex" }} flexDir="column" w={{ base: "100%", md: "68%" }} bg="white" alignItems="center" borderRadius="lg" borderWidth="1px" p="3">
@@ -124,6 +159,7 @@ function ChatBox({ fetchChats, setFetchChats }) {
                 </ScrollableFeed>
               </div>}
             <FormControl mt="3" onKeyDown={sendMessage} isRequired>
+              {isTyping && <div><Lottie options={{ animationData: typingAnimation, autoplay: true, loop: true, rendererSettings: { preserveAspectRatio: "xMidYMid slice" } }} width="70px" style={{ marginBottom: 15, marginLeft: 0 }} /></div>}
               <Input variant="filled" bg="#E0E0E0" value={message} placeholder="Enter a Message..." onChange={handleTyping} />
             </FormControl>
           </Box>
