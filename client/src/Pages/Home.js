@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
+import React, { useEffect, useState } from "react"
+import axios from "axios"
 
 function Home() {
     const [chats, setChats] = useState([])
     const fetchData = async () => {
-        let {data} = await axios.get('/chats')
+        let {data} = await axios.get("/chats")
         setChats(data);
     }
     useEffect(() => {
