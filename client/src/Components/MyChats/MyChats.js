@@ -4,8 +4,9 @@ import axios from 'axios'
 import { Box, Button, Stack, Text, useToast } from '@chakra-ui/react'
 import { AddIcon } from "@chakra-ui/icons"
 import Loading from '../Loading/Loading'
+import CreateGroup from '../CreateGroup/CreateGroup'
 
-function MyChats() {
+function MyChats({ fetchChats }) {
   const { user, chats, setChats, selectedChat, setSelectedChat } = AuthContext()
   const toast = useToast()
 
@@ -31,13 +32,15 @@ function MyChats() {
     }).catch(() => {
       showToast("Something went Wrong.", "bottom-left")
     })
-  }, [])
+  }, [fetchChats])
 
   return (
     <Box d={{ base: selectedChat ? "none" : "flex", md: "flex" }} flexDir="column" bg="white" w={{ base: "100%", md: "31%" }} borderRadius="lg" borderWidth="1px" alignItems="center" p="3">
       <Box d="flex" w="100%" fontSize={{ base: "28px", md: "30px" }} fontFamily="work sans" justifyContent="space-between" alignItems="center" pb="3" px="3">
         My Chats
-        <Button d="flex" fontSize={{ base: "17px", md: "10px", lg: "17px" }} rightIcon={<AddIcon />}>New Group Chat</Button>
+        <CreateGroup>
+          <Button d="flex" fontSize={{ base: "17px", md: "10px", lg: "17px" }} rightIcon={<AddIcon />}>New Group Chat</Button>
+        </CreateGroup>
       </Box>
       <Box d="flex" flexDir="column" w="100%" h="100%" bg="#F8F8F8" p="3" borderRadius="lg" overflowY="hidden">
         {chats ? <Stack>
