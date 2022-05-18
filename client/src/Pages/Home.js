@@ -1,22 +1,19 @@
-import React, { useEffect, useState } from "react"
-import axios from "axios"
+import { Box } from "@chakra-ui/react"
+import React from "react"
+import ChatBox from "../Components/ChatBox/ChatBox"
+import Header from "../Components/Header/Header"
+import MyChats from "../Components/MyChats/MyChats"
+import { AuthContext } from "../Contexts/Auth"
 
 function Home() {
-    const [chats, setChats] = useState([])
-    const fetchData = async () => {
-        let {data} = await axios.get("/chats")
-        setChats(data);
-    }
-    useEffect(() => {
-        fetchData()
-    })
+    const { user } = AuthContext()
     return (
-        <div>
-            {
-                chats.map((chat, id)=>
-                <h1 key={id}>{chat.chatName}</h1>
-                )
-            }
+        <div style={{ width: "100%" }}>
+            {user && <Header />}
+            <Box d="flex" justifyContent="space-between" w="100%" h="91.5vh" p="10px">
+                {user && <MyChats />}
+                {user && <ChatBox />}
+            </Box>
         </div>
     )
 }

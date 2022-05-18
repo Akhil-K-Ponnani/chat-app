@@ -1,9 +1,16 @@
-import React from "react"
+import React, { useEffect } from "react"
 import Login from "../Components/Login/Login"
 import Signup from "../Components/Signup/Signup"
 import { Box, Container, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
+import { useNavigate } from "react-router-dom"
 
 function Signin() {
+    const navigate = useNavigate()
+    useEffect(() => {
+        let user = JSON.parse(localStorage.getItem("user"))
+        if(user)
+            navigate("/")
+    })
     return (
         <Container maxW="xl">
             <Box d="flex" justifyContent="center" p="3" bg="white" width="100%" m="40px 0 15px 0" borderRadius="lg" borderWidth="1px">

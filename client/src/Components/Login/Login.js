@@ -4,8 +4,8 @@ import axios from "axios"
 import { Button, FormControl, FormLabel, Input, InputGroup, InputRightElement, useToast, VStack } from "@chakra-ui/react"
 
 function Login() {
-    const [email, setEmail] = useState()
-    const [password, setPassword] = useState()
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
     const [show, setShow] = useState()
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
@@ -28,11 +28,11 @@ function Login() {
                 let config = { headers: { "Content-type": "application/json" } }
                 axios.post("/user/login", { email, password }, config).then(({ data }) => {
                     localStorage.setItem("user", JSON.stringify(data))
-                    showToast("Success", "Login Successful", "success")
+                    showToast("Success", "Login Successful.", "success")
                     setLoading(false)
                     navigate("/")
-                }).catch(({ response }) => {
-                    showToast("Error", response.data.message, "error")
+                }).catch(() => {
+                    showToast("Error", "Something went Wrong.", "error")
                     setLoading(false)
                 })
             }
