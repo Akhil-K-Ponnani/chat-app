@@ -1,12 +1,13 @@
 import chatModel from "../models/chatModel.js"
+import userModel from "../models/userModel.js"
 
 const chatHelpers = {
     getAllChats: (userId) => {
         return new Promise(async (resolve, reject) => {
             let chats = await chatModel.find({
                 users: { $elemMatch: { $eq: userId } }
-            }).populate("users").populate("latestMessage", "groupAdmin").sort({ updatedAt: -1 })
-            chats = await chatModel.populate(chats, { path: "latestMessage.sender", select: "name email picture" })
+            }).populate("users", "-password").populate("groupAdmin", "-password").populate("latestMessage").sort({ updatedAt: -1 })
+            chats = await userModel.populate(chats, { path: "latestMessage.sender", select: "name email picture" })
             resolve(chats)
         })
     },
@@ -17,7 +18,7 @@ const chatHelpers = {
                 users: { $elemMatch: { $eq: firstUserId } },
                 users: { $elemMatch: { $eq: secondUserId } }
             }).populate("users", "-password").populate("latestMessage")
-            chat = await chatModel.populate(chat, { path: "latestMessage.sender", select: "name email picture" })
+            chat = await userModel.populate(chat, { path: "latestMessage.sender", select: "name email picture" })
             if (chat.length > 0)
                 resolve(chat[0])
             else {
@@ -27,7 +28,7 @@ const chatHelpers = {
                     users: [firstUserId, secondUserId]
                 }
                 chatModel.create(chatData).then(async (chat) => {
-                    chat = await chatModel.find({ _id: chat._id }).populate("users", "-password")
+                    chat = await chatModel.findOne({ _id: chat._id }).populate("users", "-password")
                     resolve(chat)
                 })
             }
