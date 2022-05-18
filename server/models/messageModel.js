@@ -2,13 +2,13 @@ import mongoose from "mongoose";
 
 const messageSchema = mongoose.Schema(
     {
-        name: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        name: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         content: { type: String, trim: true },
-        chat: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat' }
+        chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" }
     },
     {
         timestamps: true
     }
 );
 
-export default mongoose.model('Message', messageSchema);
+export default mongoose.model("Message", messageSchema);
