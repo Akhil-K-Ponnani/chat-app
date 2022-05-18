@@ -2,6 +2,7 @@ import express from "express";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/user.js";
 import chatRoutes from "./routes/chat.js"
+import messageRoutes from "./routes/message.js"
 import error from "./middlewares/error.js"
 
 /* App Config */
@@ -12,6 +13,7 @@ const port = process.env.PORT || 5000;
 app.use(express.json())
 app.use("/user", userRoutes);
 app.use("/chat", chatRoutes);
+app.use("/message", messageRoutes);
 app.use(error.notFound);
 app.use(error.errorHandler);
 
