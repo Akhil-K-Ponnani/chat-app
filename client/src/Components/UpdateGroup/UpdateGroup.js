@@ -4,7 +4,7 @@ import { Avatar, Box, Button, FormControl, IconButton, Input, Modal, ModalBody, 
 import { CloseIcon, ViewIcon } from '@chakra-ui/icons'
 import axios from 'axios'
 
-function UpdateGroup({ fetchChats, setFetchChats }) {
+function UpdateGroup({ fetchChats, setFetchChats, fetchMessages }) {
     const [groupName, setGroupName] = useState("")
     const [searchResult, setSearchResult] = useState([])
     const [loading, setLoading] = useState()
@@ -60,6 +60,7 @@ function UpdateGroup({ fetchChats, setFetchChats }) {
             axios.put("/chat/remove-from-group", { chatId: selectedChat._id, userId: userData._id }, config).then(({ data }) => {
                 userData._id === user._id ? setSelectedChat() : setSelectedChat(data)
                 setFetchChats(!fetchChats)
+                fetchMessages()
                 setLoading(false)
             }).catch(() => {
                 showToast("Error", "Something went Wrong.", "error")
@@ -120,7 +121,7 @@ function UpdateGroup({ fetchChats, setFetchChats }) {
                     <ModalBody>
                         <Box d="flex" flexWrap="wrap" w="100%" pb="3">
                             {selectedChat.users.map((user) =>
-                                <Box variant="solid" fontSize="12" bg="purple" color="white" borderRadius="lg" m="1" mb="2" px="2" py="1" cursor="pointer" onClick={() => deleteFromGroup(user)}>
+                                <Box key={user._id} variant="solid" fontSize="12" bg="purple" color="white" borderRadius="lg" m="1" mb="2" px="2" py="1" cursor="pointer" onClick={() => deleteFromGroup(user)}>
                                     {user.name}
                                     <CloseIcon pl="1" />
                                 </Box>
