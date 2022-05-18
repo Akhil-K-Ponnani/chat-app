@@ -1,13 +1,5 @@
-import jwt from "jsonwebtoken";
+import generateToken from "../config/jwt.js";
 import userModel from "../models/userModel.js";
-
-const generateToken = (id) => {
-    return jwt.sign({ id }, "chat-app-jwt", { expiresIn: "30d" })
-}
-
-const verifyToken = (token) => {
-    return jwt.verify(token, "chat-app-jwt")
-}
 
 const userHelpers = {
     userSignup: (userData) => {
@@ -48,18 +40,12 @@ const userHelpers = {
                 reject("Invalid Email or Password.")
         })
     },
-    authUser: (bearerToken) => {
-        return new Promise(async (resolve, reject) => {
-            let token
-            token = bearerToken.split(" ")[1]
-            let decodedToken = verifyToken(token)
-            let user = await userModel.findById(decodedToken.id).select("-password")
-            resolve(user)
-        })
-    },
     searchUser: (keyword, userId) => {
         return new Promise(async (resolve, reject) => {
-            let users = await userModel.find({ $or: [{ name: { $regex: keyword, $options: "i" } }, { email: { $regex: keyword, $options: "i" } }] }).find({ _id: { $ne: userId } })
+            let users = await userModel.find({
+                _id: { $ne: userId },
+                $or: [{ name: { $regex: keyword, $options: "i" } }, { email: { $regex: keyword, $options: "i" } }]
+            })
             resolve(users)
         })
     }
