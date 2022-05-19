@@ -1,12 +1,12 @@
-import generateToken from "../config/jwt.js";
 import userModel from "../models/userModel.js";
+import generateToken from "../config/jwt.js";
 
-const userHelpers = {
+export default {
     userSignup: (userData) => {
         return new Promise(async (resolve, reject) => {
             let user = await userModel.findOne({ email: userData.email })
             if (user)
-                reject("User already Exists.")
+                reject("User already exists.")
             else {
                 userModel.create(userData).then((user) => {
                     user = {
@@ -18,7 +18,7 @@ const userHelpers = {
                     }
                     resolve(user)
                 }).catch(() =>
-                    reject("Signup Failed.")
+                    reject("Signup failed.")
                 )
             }
         })
@@ -41,7 +41,7 @@ const userHelpers = {
         })
     },
     searchUser: (keyword, userId) => {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             let users = await userModel.find({
                 _id: { $ne: userId },
                 $or: [{ name: { $regex: keyword, $options: "i" } }, { email: { $regex: keyword, $options: "i" } }]
@@ -50,5 +50,3 @@ const userHelpers = {
         })
     }
 };
-
-export default userHelpers;

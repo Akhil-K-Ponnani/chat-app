@@ -1,4 +1,4 @@
-const error = {
+export default {
     notFound: (req, res, next) => {
         const error = new Error(`Not Found ${req.originalUrl}`)
         res.status(404)
@@ -10,5 +10,3 @@ const error = {
         res.json({ message: err.message, stack: process.env.NODE_ENV === "production" ? null : err.stack })
     }
 }
-
-export default error;

@@ -10,7 +10,7 @@ router.post("/", auth.userAuth, (req, res) => {
         )
     }
     else
-        res.json(400).json({ message: "Please fill all the Fields." })
+        res.json(400).send({ message: "The content or chatId not found." })
 })
 
 router.get("/:chatId", auth.userAuth, async (req, res) => {
@@ -19,7 +19,7 @@ router.get("/:chatId", auth.userAuth, async (req, res) => {
         res.status(200).json(messages)
     }
     else
-        res.status(400).json({ message: "Please fill ChatId." })
+        res.status(400).send({ message: "The chatId not found." })
 })
 
 export default router;

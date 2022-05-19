@@ -8,6 +8,8 @@ router.get("/", auth.userAuth, async (req, res) => {
         let users = await userHelpers.searchUser(req.query.search, req.user._id)
         res.status(200).json(users)
     }
+    else
+        res.status(400).send({ message: "The search query not found." })
 });
 
 router.post("/signup", (req, res) => {
@@ -15,11 +17,11 @@ router.post("/signup", (req, res) => {
         userHelpers.userSignup(req.body).then((user) =>
             res.status(201).json(user)
         ).catch((error) =>
-            res.status(400).json({ message: error })
+            res.status(400).send({ message: error })
         )
     }
     else
-        res.status(400).json({message:"Please fill all the Fields."})
+        res.status(400).send({ message: "The signup details not found." })
 })
 
 router.post("/login", (req, res) => {
@@ -27,11 +29,11 @@ router.post("/login", (req, res) => {
         userHelpers.userLogin(req.body).then((user) =>
             res.status(201).json(user)
         ).catch((error) =>
-            res.status(400).json({ message: error })
+            res.status(400).send({ message: error })
         )
     }
     else
-        res.status(400).json({ message: "Please fill all the Fields." })
+        res.status(400).send({ message: "The login details not found." })
 })
 
 export default router;

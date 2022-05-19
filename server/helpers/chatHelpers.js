@@ -1,26 +1,23 @@
 import chatModel from "../models/chatModel.js"
-import userModel from "../models/userModel.js"
 
-const chatHelpers = {
+export default {
     getAllChats: (userId) => {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             let chats = await chatModel.find({
                 users: { $elemMatch: { $eq: userId } }
             }).populate("users", "-password").populate("groupAdmin", "-password").populate("latestMessage").sort({ updatedAt: -1 })
-            chats = await userModel.populate(chats, { path: "latestMessage.sender", select: "name email picture" })
             resolve(chats)
         })
     },
-    getChatDetails: (firstUserId, secondUserId) => {
-        return new Promise(async (resolve, reject) => {
-            let chat = await chatModel.find({
+    startChat: (firstUserId, secondUserId) => {
+        return new Promise(async (resolve) => {
+            let chat = await chatModel.findOne({
                 isGroup: false,
                 users: { $elemMatch: { $eq: firstUserId } },
                 users: { $elemMatch: { $eq: secondUserId } }
             }).populate("users", "-password").populate("latestMessage")
-            chat = await userModel.populate(chat, { path: "latestMessage.sender", select: "name email picture" })
-            if (chat.length > 0)
-                resolve(chat[0])
+            if (chat)
+                resolve(chat)
             else {
                 let chatData = {
                     name: "sender",
@@ -34,7 +31,7 @@ const chatHelpers = {
             }
         })
     },
-    createGroup: (adminUserId, users, chatName) => {
+    createGroupChat: (adminUserId, users, chatName) => {
         return new Promise((resolve, reject) => {
             users.push(adminUserId)
             if (users.length > 2) {
@@ -43,36 +40,34 @@ const chatHelpers = {
                     users: users,
                     isGroup: true,
                     groupAdmin: adminUserId
-                }).then(async (group) => {
-                    group = await chatModel.findOne({ _id: group._id }).populate("users", "-password").populate("groupAdmin", "-password")
-                    resolve(group)
+                }).then(async (groupChat) => {
+                    groupChat = await chatModel.findOne({ _id: groupChat._id }).populate("users", "-password").populate("groupAdmin", "-password")
+                    resolve(groupChat)
                 })
             }
             else
                 reject("More than two users required to create a group chat")
         })
     },
-    renameGroup: (chatId, groupName) => {
-        return new Promise((resolve, reject) => {
-            chatModel.findByIdAndUpdate(chatId, { name: groupName }, { new: true }).populate("users", "-password").populate("groupAdmin", "-password").then((group) => {
-                resolve(group)
+    renameGroupChat: (chatId, groupName) => {
+        return new Promise((resolve) => {
+            chatModel.findByIdAndUpdate(chatId, { name: groupName }, { new: true }).populate("users", "-password").populate("groupAdmin", "-password").then((groupChat) => {
+                resolve(groupChat)
             })
         })
     },
-    addToGroup: (chatId, userId) => {
-        return new Promise((resolve, reject) => {
-            chatModel.findByIdAndUpdate(chatId, { $push: { users: userId } }, { new: true }).populate("users", "-password").populate("groupAdmin", "-password").then((group) => {
-                resolve(group)
+    addToGroupChat: (chatId, userId) => {
+        return new Promise((resolve) => {
+            chatModel.findByIdAndUpdate(chatId, { $push: { users: userId } }, { new: true }).populate("users", "-password").populate("groupAdmin", "-password").then((groupChat) => {
+                resolve(groupChat)
             })
         })
     },
-    removeFromGroup: (chatId, userId) => {
-        return new Promise((resolve, reject) => {
-            chatModel.findByIdAndUpdate(chatId, { $pull: { users: userId } }, { new: true }).populate("users", "-password").populate("groupAdmin", "-password").then((group) => {
-                resolve(group)
+    removeFromGroupChat: (chatId, userId) => {
+        return new Promise((resolve) => {
+            chatModel.findByIdAndUpdate(chatId, { $pull: { users: userId } }, { new: true }).populate("users", "-password").populate("groupAdmin", "-password").then((groupChat) => {
+                resolve(groupChat)
             })
         })
     }
 }
-
-export default chatHelpers;
